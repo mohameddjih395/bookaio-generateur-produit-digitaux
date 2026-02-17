@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Trash2, FileText, Play, Layout, ExternalLink } from 'lucide-react';
+import { Clock, Trash2, FileText, Play, Layout, ExternalLink, Copy } from 'lucide-react';
 import { GeneratedItem } from '../../types';
 
 export const HistoryUI: React.FC<{ user: any }> = ({ user }) => {
@@ -34,7 +34,19 @@ export const HistoryUI: React.FC<{ user: any }> = ({ user }) => {
                             </div>
                             <div><p className="text-sm font-bold text-white truncate max-w-[200px]">{item.title}</p><p className="text-[10px] text-white/20 uppercase tracking-widest">{item.type} • {new Date(item.timestamp).toLocaleString()}</p></div>
                         </div>
-                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500 hover:text-white transition-all"><ExternalLink className="w-5 h-5" /></a>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(item.url);
+                                    alert("Lien copié !");
+                                }}
+                                aria-label="Copier le lien"
+                                className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-black/20 transition-all text-white/60 hover:text-white"
+                            >
+                                <Copy className="w-5 h-5" />
+                            </button>
+                            <a href={item.url} target="_blank" rel="noopener noreferrer" aria-label="Ouvrir le lien" className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500 hover:text-white transition-all"><ExternalLink className="w-5 h-5" /></a>
+                        </div>
                     </div>
                 ))}
             </div>

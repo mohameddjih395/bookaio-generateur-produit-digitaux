@@ -61,10 +61,10 @@ export const StepContent: React.FC<StepProps> = ({ form, updateForm, onNext, pro
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {sources.map((src) => (
-                    <button key={src.id} type="button" disabled={src.locked} onClick={() => updateForm({ source_type: src.id as any })} className={`p-6 rounded-[28px] flex flex-col items-center gap-3 transition-all border relative overflow-hidden ${form.source_type === src.id ? 'border-red-500 bg-red-500/10 text-white shadow-lg' : 'border-white/5 bg-white/5 text-white/40 hover:bg-white/10 hover:border-white/10'} ${src.locked ? 'opacity-50' : ''}`}>
+                    <button key={src.id} type="button" disabled={src.locked} aria-label={`Source: ${src.label}`} onClick={() => updateForm({ source_type: src.id as any })} className={`p-6 rounded-[28px] flex flex-col items-center gap-3 transition-all border relative overflow-hidden ${form.source_type === src.id ? 'border-red-500 bg-red-500/10 text-white shadow-lg' : 'border-white/5 bg-white/5 text-white/40 hover:bg-white/10 hover:border-white/10'} ${src.locked ? 'opacity-50' : ''}`}>
                         {src.locked && <Lock className="absolute top-2 right-2 w-3 h-3 text-red-500" />}
                         <src.icon className={`w-7 h-7 ${form.source_type === src.id ? 'text-red-500' : ''}`} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">{src.label}</span>
+                        <span className="text-xs font-bold uppercase tracking-widest">{src.label}</span>
                     </button>
                 ))}
             </div>
@@ -87,14 +87,14 @@ export const StepContent: React.FC<StepProps> = ({ form, updateForm, onNext, pro
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-3">
-                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Pages (Max {maxPages})</label>
+                    <label className="text-xs font-bold text-white/40 uppercase tracking-[0.3em]">Pages (Max {maxPages})</label>
                     <div className="relative">
-                        <input type="number" min="1" max={maxPages} className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-white font-bold pr-12 outline-none" value={form.nombre_pages} onChange={(e) => handlePageChange(e.target.value)} />
+                        <input type="number" min="1" max={maxPages} aria-label="Nombre de pages" className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-white font-bold pr-12 outline-none focus:border-red-500/50" value={form.nombre_pages} onChange={(e) => handlePageChange(e.target.value)} />
                         {form.nombre_pages >= maxPages && <Sparkles className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />}
                     </div>
                 </div>
-                <div className="space-y-3"><label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Chapitres</label><input type="number" className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-white font-bold outline-none" value={form.nombre_chapitres} onChange={(e) => updateForm({ nombre_chapitres: parseInt(e.target.value) || 0 })} /></div>
-                <div className="space-y-3"><label className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Mots/Page</label><input type="number" className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-white font-bold outline-none" value={form.mots_par_page} onChange={(e) => updateForm({ mots_par_page: parseInt(e.target.value) || 0 })} /></div>
+                <div className="space-y-3"><label className="text-xs font-bold text-white/40 uppercase tracking-[0.3em]">Chapitres</label><input type="number" aria-label="Nombre de chapitres" className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-white font-bold outline-none focus:border-red-500/50" value={form.nombre_chapitres} onChange={(e) => updateForm({ nombre_chapitres: parseInt(e.target.value) || 0 })} /></div>
+                <div className="space-y-3"><label className="text-xs font-bold text-white/40 uppercase tracking-[0.3em]">Mots/Page</label><input type="number" aria-label="Nombre de mots par page" className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-white font-bold outline-none focus:border-red-500/50" value={form.mots_par_page} onChange={(e) => updateForm({ mots_par_page: parseInt(e.target.value) || 0 })} /></div>
             </div>
 
             <button onClick={() => onNext()} className="w-full py-6 rounded-2xl gradient-amber text-white font-bold text-xl flex items-center justify-center gap-3 shadow-xl shadow-red-500/10">Suivant <ChevronRight className="w-6 h-6" /></button>

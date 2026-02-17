@@ -51,12 +51,12 @@ export const Studio: React.FC<StudioProps> = ({ user, profile }) => {
               {plan === 'free' ? <Lock className="w-8 h-8 text-white/20" /> : <Zap className="w-8 h-8 text-white" />}
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-red-500 mb-1">Status de Privilège</p>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-red-500 mb-1">Status de Privilège</p>
               <h3 className="text-2xl font-serif">Plan <span className="capitalize text-white">{plan}</span> Elite</h3>
             </div>
           </div>
           <div className="flex-1 w-full max-w-md space-y-3">
-            <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
+            <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
               <span className="text-white/40">Consommation Ebooks</span>
               <span className="text-red-500">{usageCount} / {currentLimit}</span>
             </div>
@@ -64,11 +64,11 @@ export const Studio: React.FC<StudioProps> = ({ user, profile }) => {
               <div className={`h-full rounded-full transition-all duration-1000 shadow-lg ${usageCount >= currentLimit ? 'bg-zinc-600' : 'gradient-amber shadow-red-500/30'}`} style={{ width: `${Math.min((usageCount / currentLimit) * 100, 100)}%` }} />
             </div>
           </div>
-          {usageCount >= currentLimit && <a href="#pricing" className="px-8 py-4 rounded-2xl gradient-amber text-white font-bold text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Upgrade</a>}
+          {usageCount >= currentLimit && <a href="#pricing" className="px-8 py-4 rounded-2xl gradient-amber text-white font-bold text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-xl">Upgrade</a>}
         </div>
 
         <div className="flex flex-col md:flex-row gap-8 items-start">
-          <div className="w-full md:w-80 space-y-2 sticky top-32">
+          <div className="w-full md:w-80 flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-4 md:pb-0 sticky top-32 no-scrollbar">
             {[
               { id: 'cover', icon: ImageIcon, label: 'Design de Cover' },
               { id: 'ebook', icon: BookOpen, label: "Générer l'Ebook" },
@@ -77,9 +77,15 @@ export const Studio: React.FC<StudioProps> = ({ user, profile }) => {
               { id: 'video', icon: Video, label: 'Vidéo Promo (Elite)', locked: plan === 'free' },
               { id: 'history', icon: History, label: 'Archives & Logs' },
             ].map((m) => (
-              <button key={m.id} disabled={m.locked} onClick={() => setMode(m.id as any)} className={`w-full flex items-center justify-between px-6 py-5 rounded-2xl transition-all border ${mode === m.id ? 'bg-red-500/10 border-red-500/40 text-white' : 'hover:bg-white/5 border-transparent text-white/40'} ${m.locked ? 'opacity-30 cursor-not-allowed' : ''}`}>
+              <button
+                key={m.id}
+                disabled={m.locked}
+                onClick={() => setMode(m.id as any)}
+                aria-label={m.label}
+                className={`flex-shrink-0 md:flex-shrink-1 flex items-center justify-between px-6 py-5 rounded-2xl transition-all border whitespace-nowrap ${mode === m.id ? 'bg-red-500/10 border-red-500/40 text-white shadow-inner shadow-red-500/5' : 'hover:bg-white/5 border-transparent text-white/40'} ${m.locked ? 'opacity-30 cursor-not-allowed' : ''}`}
+              >
                 <div className="flex items-center gap-4"><m.icon className={`w-5 h-5 ${mode === m.id ? 'text-red-500' : ''}`} /> <span className="font-bold text-sm">{m.label}</span></div>
-                {m.locked ? <Lock className="w-3 h-3" /> : <ChevronRight className="w-4 h-4 opacity-30" />}
+                {m.locked ? <Lock className="w-3 h-3 ml-2" /> : <ChevronRight className="hidden md:block w-4 h-4 opacity-30" />}
               </button>
             ))}
           </div>
