@@ -1,8 +1,6 @@
+import { createClient } from '@supabase/supabase-js';
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@^2.39.7';
-
-// Nouveaux identifiants fournis
-const supabaseUrl = 'https://rkixjkwjgwzkrubvsipa.supabase.co';
-const supabaseAnonKey = 'sb_publishable_RLH07P2NFPiQsDqHEsaOSQ_fMHwZLFT';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);

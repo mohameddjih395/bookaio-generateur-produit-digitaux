@@ -1,8 +1,7 @@
-
 import { CloudinaryResponse } from '../types';
 
-const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dt9sxjxve/image/upload';
-const UPLOAD_PRESET = 'ml_default';
+const CLOUDINARY_URL = import.meta.env.VITE_CLOUDINARY_URL;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 export const uploadToCloudinary = async (file: File): Promise<string> => {
   const formData = new FormData();

@@ -1,7 +1,6 @@
-
 import { GeneratedItem } from '../types';
 
-const BASE_WEBHOOK_URL = 'https://digitaladn225.app.n8n.cloud/webhook/bookaio';
+const BASE_WEBHOOK_URL = import.meta.env.VITE_BASE_WEBHOOK_URL;
 const GLOBAL_TIMEOUT = 300000; // 5 minutes en millisecondes
 
 export type WebhookType = 'ebook' | 'cover' | 'mockup' | 'ad' | 'video';
@@ -10,7 +9,7 @@ export const saveToHistory = (userId: string, item: Omit<GeneratedItem, 'id' | '
   if (!userId) return;
   const storageKey = `bookaio_history_${userId}`;
   const history: GeneratedItem[] = JSON.parse(localStorage.getItem(storageKey) || '[]');
-  
+
   const newItem: GeneratedItem = {
     ...item,
     id: Math.random().toString(36).substr(2, 9),
@@ -20,7 +19,7 @@ export const saveToHistory = (userId: string, item: Omit<GeneratedItem, 'id' | '
 
   const updatedHistory = [newItem, ...history].slice(0, 50); // On garde les 50 derniers logs
   localStorage.setItem(storageKey, JSON.stringify(updatedHistory));
-  
+
   // Dispatch un event pour rafraîchir l'UI
   window.dispatchEvent(new Event('historyUpdated'));
 };
@@ -52,11 +51,11 @@ export const sendToWebhook = async (data: any, type: WebhookType = 'ebook'): Pro
     if (!response.ok) return null;
 
     const contentType = response.headers.get('content-type') || '';
-    
+
     // Vérification si le retour est un fichier binaire
     if (
-      contentType.includes('application/pdf') || 
-      contentType.includes('image/') || 
+      contentType.includes('application/pdf') ||
+      contentType.includes('image/') ||
       contentType.includes('video/mp4') ||
       contentType.includes('application/octet-stream')
     ) {

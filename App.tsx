@@ -29,7 +29,7 @@ const App: React.FC = () => {
       .select('*')
       .eq('id', userId)
       .single();
-    
+
     if (error && error.code === 'PGRST116') {
       const { data: newData } = await supabase.from('profiles').insert({
         id: userId,
@@ -38,7 +38,7 @@ const App: React.FC = () => {
       }).select().single();
       data = newData;
     }
-    
+
     if (data) setUserProfile(data);
   };
 
@@ -80,7 +80,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen selection:bg-red-500/30">
       <Navbar />
-      
+
       {/* User Status Control */}
       <div className="fixed top-24 right-6 z-40 hidden md:block">
         {user ? (
@@ -90,11 +90,11 @@ const App: React.FC = () => {
               <p className="text-[10px] font-bold text-red-500 truncate max-w-[120px]">{user.email}</p>
             </div>
             <button onClick={handleSignOut} className="p-2 rounded-xl bg-white/5 hover:bg-red-500/10 transition-colors text-white/40 hover:text-red-500">
-               <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          <button 
+          <button
             onClick={() => setIsAuthOpen(true)}
             className="glass-card px-6 py-3 rounded-2xl border-red-500/20 text-[10px] font-bold uppercase tracking-widest text-white hover:border-red-500 transition-all flex items-center gap-2"
           >
@@ -131,20 +131,20 @@ const App: React.FC = () => {
 
       <section className="py-20 border-y border-white/5 bg-white/[0.01]">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12">
-           {[
-             { label: 'Ebooks Générés', val: '+1568+', icon: Zap },
-             { label: 'Visuels de Vente', val: '+974', icon: Target },
-             { label: 'Succès Client', val: '97%', icon: Trophy },
-             { label: 'Délai Moyen', val: '< 45s', icon: Zap }
-           ].map((stat) => (
-             <div key={stat.label} className="text-center md:text-left space-y-1 group">
-               <div className="flex items-center justify-center md:justify-start gap-2 mb-2 text-white/40 group-hover:text-red-500 transition-colors">
-                 <stat.icon className="w-4 h-4" />
-                 <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{stat.label}</span>
-               </div>
-               <p className="text-4xl font-serif font-bold tracking-tight">{stat.val}</p>
-             </div>
-           ))}
+          {[
+            { label: 'Ebooks Générés', val: '+1568+', icon: Zap },
+            { label: 'Visuels de Vente', val: '+974', icon: Target },
+            { label: 'Succès Client', val: '97%', icon: Trophy },
+            { label: 'Délai Moyen', val: '< 45s', icon: Zap }
+          ].map((stat) => (
+            <div key={stat.label} className="text-center md:text-left space-y-1 group">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-2 text-white/40 group-hover:text-red-500 transition-colors">
+                <stat.icon className="w-4 h-4" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{stat.label}</span>
+              </div>
+              <p className="text-4xl font-serif font-bold tracking-tight">{stat.val}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -156,20 +156,20 @@ const App: React.FC = () => {
       <footer className="pt-24 pb-32 md:pb-16 border-t border-white/5 relative overflow-hidden">
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[300px] bg-red-500/5 blur-[150px] -z-10 rounded-full" />
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center gap-12">
-           <div className="flex items-center gap-4">
-             <div className="w-12 h-12 rounded-2xl overflow-hidden border border-red-500/30">
-                <img src="https://res.cloudinary.com/dt9sxjxve/image/upload/v1769591812/Untitled_design_4_fhluy3.jpg" alt="Logo" className="w-full h-full object-cover" />
-             </div>
-             <span className="font-bold text-2xl tracking-tighter">Book<span className="text-red-500">AIO</span></span>
-           </div>
-           <div className="flex flex-wrap justify-center gap-10 text-xs font-bold uppercase tracking-widest text-white/30">
-             <a href="#how-it-works" className="hover:text-red-500 transition-colors">Vision</a>
-             <a href="#studio" className="hover:text-red-500 transition-colors">Studio</a>
-             <a href="#pricing" className="hover:text-red-500 transition-colors">Prix</a>
-             <a href="#faq" className="hover:text-red-500 transition-colors">F.A.Q</a>
-             <button onClick={() => user ? handleSignOut() : setIsAuthOpen(true)} className="hover:text-red-500 transition-colors">{user ? 'Déconnexion' : 'Connexion'}</button>
-           </div>
-           <p className="text-white/10 text-[9px] tracking-[0.5em] uppercase font-bold">© 2024 BookAIO.com - L'Excellence par l'IA.</p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl overflow-hidden border border-red-500/30">
+              <img src="https://res.cloudinary.com/dt9sxjxve/image/upload/v1769591812/Untitled_design_4_fhluy3.jpg" alt="Logo" className="w-full h-full object-cover" />
+            </div>
+            <span className="font-bold text-2xl tracking-tighter">Book<span className="text-red-500">AIO</span></span>
+          </div>
+          <div className="flex flex-wrap justify-center gap-10 text-xs font-bold uppercase tracking-widest text-white/30">
+            <a href="#how-it-works" className="hover:text-red-500 transition-colors">Vision</a>
+            <a href="#studio" className="hover:text-red-500 transition-colors">Studio</a>
+            <a href="#pricing" className="hover:text-red-500 transition-colors">Prix</a>
+            <a href="#faq" className="hover:text-red-500 transition-colors">F.A.Q</a>
+            <button onClick={() => user ? handleSignOut() : setIsAuthOpen(true)} className="hover:text-red-500 transition-colors">{user ? 'Déconnexion' : 'Connexion'}</button>
+          </div>
+          <p className="text-white/10 text-[9px] tracking-[0.5em] uppercase font-bold">© 2024 BookAIO.com - L'Excellence par l'IA.</p>
         </div>
       </footer>
 

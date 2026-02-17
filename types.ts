@@ -5,8 +5,8 @@ export interface GenerationForm {
   mots_par_page: number;
   avec_image: boolean;
   auteur: string;
-  '1.titre': string;
-  '2. cover_url': string;
+  title: string;
+  coverUrl: string;
   source_type: 'idea' | 'text' | 'youtube' | 'reel' | 'tiktok' | 'video' | 'audio' | 'vocal';
   source_content?: string;
   media_url?: string;
@@ -32,6 +32,17 @@ export interface GeneratedItem {
   url: string;
   timestamp: number;
   expiresAt: number;
+}
+
+export interface StepProps {
+  form: GenerationForm;
+  updateForm: (updates: Partial<GenerationForm>) => void;
+  onNext: (data?: any) => void;
+  onPrev: () => void;
+  onFail?: () => void;
+  onModeChange?: (mode: any) => void;
+  profile: any;
+  user: any;
 }
 
 export interface CloudinaryResponse {
