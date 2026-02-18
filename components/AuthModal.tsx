@@ -14,29 +14,48 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
+  const validateForm = (): string | null => {
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return 'Veuillez entrer une adresse email valide.';
+    }
+    if (password.length < 8) {
+      return 'Le mot de passe doit contenir au moins 8 caractères.';
+    }
+    return null;
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    setSuccessMessage(null);
+
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      const { error: authError } = isLogin 
+      const { error: authError } = isLogin
         ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ 
-            email, 
-            password,
-            options: {
-              emailRedirectTo: window.location.origin,
-            }
-          });
+        : await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin,
+          }
+        });
 
       if (authError) throw authError;
-      
+
       if (!isLogin) {
-        alert("Inscription réussie ! Veuillez vérifier votre boîte mail pour confirmer votre compte avant de vous connecter.");
+        setSuccessMessage('Inscription réussie ! Vérifiez votre boîte mail pour confirmer votre compte.');
       } else {
         onClose();
       }
@@ -82,7 +101,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           </p>
         </div>
 
-        <button 
+        <button
           onClick={handleGoogleLogin}
           disabled={loading}
           className="w-full py-4 mb-8 rounded-2xl bg-white/5 border border-white/10 text-white font-bold flex items-center justify-center gap-3 hover:bg-white/10 transition-all text-[10px] tracking-widest uppercase shadow-lg"
@@ -100,21 +119,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         <form onSubmit={handleAuth} className="space-y-4">
           <div className="relative group">
             <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within:text-red-500 transition-colors" />
-            <input 
-              type="email" 
-              placeholder="Adresse Email" 
+            <input
+              type="email"
+              placeholder="Adresse Email"
               required
               className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-white focus:border-red-500/40 outline-none transition-all placeholder:text-white/10"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          
+
           <div className="relative group">
             <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within:text-red-500 transition-colors" />
-            <input 
-              type="password" 
-              placeholder="Mot de passe" 
+            <input
+              type="password"
+              placeholder="Mot de passe"
               required
               className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-white focus:border-red-500/40 outline-none transition-all placeholder:text-white/10"
               value={password}
@@ -128,8 +147,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          <button 
-            type="submit" 
+          {successMessage && (
+            <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-widest text-center">
+              {successMessage}
+            </div>
+          )}
+
+          <button
+            type="submit"
             disabled={loading}
             className="w-full py-6 rounded-2xl gradient-amber text-white font-bold uppercase tracking-widest text-[11px] hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-2xl shadow-red-500/20 shine-effect"
           >
@@ -138,7 +163,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         </form>
 
         <div className="mt-10 text-center">
-          <button 
+          <button
             onClick={() => setIsLogin(!isLogin)}
             className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/30 hover:text-red-500 transition-colors"
           >

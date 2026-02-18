@@ -55,12 +55,12 @@ export const Pricing: React.FC<PricingProps> = ({ userEmail, userId, onPaymentSu
     }
 
     setLoadingPlan(planId);
-    
+
     const handler = (window as any).PaystackPop.setup({
       // Clé Live mise à jour
-      key: 'pk_live_29053c2489c4562c27f56994850a7ff081b2bfe4', 
+      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
       email: userEmail,
-      amount: amount * 100, 
+      amount: amount * 100,
       currency: 'XOF',
       metadata: {
         user_id: userId,
@@ -70,6 +70,9 @@ export const Pricing: React.FC<PricingProps> = ({ userEmail, userId, onPaymentSu
       },
       callback: (response: any) => {
         setLoadingPlan(null);
+        // NOTE: In production, plan updates MUST be handled via a server-side webhook 
+        // from Paystack to ensure payment integrity (e.g. n8n -> Supabase).
+        // This client-side update is only for UI responsiveness.
         onPaymentSuccess(planId as any);
       },
       onClose: () => {
@@ -85,10 +88,10 @@ export const Pricing: React.FC<PricingProps> = ({ userEmail, userId, onPaymentSu
         <div className="text-center space-y-6 mb-16">
           <p className="text-red-500 font-bold uppercase tracking-[0.4em] text-[10px]">Tarifs Exceptionnels</p>
           <h2 className="text-4xl md:text-6xl font-serif">Le prix de l'excellence, <br /><span className="text-white/40">enfin accessible.</span></h2>
-          
+
           <div className="flex items-center justify-center gap-4 pt-6">
             <span className={`text-[10px] font-bold uppercase tracking-widest ${billingCycle === 'monthly' ? 'text-white' : 'text-white/20'}`}>Mensuel</span>
-            <button 
+            <button
               onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annually' : 'monthly')}
               className="w-14 h-7 rounded-full bg-white/5 border border-white/10 relative p-1"
             >
@@ -118,7 +121,7 @@ export const Pricing: React.FC<PricingProps> = ({ userEmail, userId, onPaymentSu
               {plan.link ? (
                 <a href={plan.link} className={`w-full py-4 rounded-xl font-bold uppercase text-[9px] text-center tracking-widest ${plan.buttonClass}`}>Démarrer</a>
               ) : (
-                <button 
+                <button
                   onClick={() => handlePayment(plan.id, billingCycle === 'monthly' ? plan.price.monthly : plan.price.annually)}
                   disabled={loadingPlan === plan.id}
                   className={`w-full py-4 rounded-xl font-bold uppercase text-[9px] tracking-widest flex items-center justify-center gap-2 shine-effect ${plan.buttonClass}`}

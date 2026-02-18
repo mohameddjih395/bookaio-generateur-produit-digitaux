@@ -1,10 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Trash2, FileText, Play, Layout, ExternalLink, Copy } from 'lucide-react';
 import { GeneratedItem } from '../../types';
+import { supabase } from '../../services/supabaseClient';
 
 export const HistoryUI: React.FC<{ user: any }> = ({ user }) => {
     const [history, setHistory] = useState<GeneratedItem[]>([]);
-    const loadHistory = () => { if (user) setHistory(JSON.parse(localStorage.getItem(`bookaio_history_${user.id}`) || '[]')); };
+    const [isLoading, setIsLoading] = useState(false);
+
+    const loadHistory = async () => {
+        if (!user) return;
+        setIsLoading(true);
+        const { data, error } = await supabase
+            .from('generations')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+        if (data) {
+            setHistory(data.map(item => ({
+                id: item.id,
+                type: item.type,
+                title: item.title,
+                url: item.url,
+                timestamp: new Date(item.created_at).getTime(),
+                expiresAt: 0 // Plus besoin d'expiration avec la DB persistante
+            })));
+        } else if (error) {
+            console.error("Erreur chargement historique:", error);
+            // Fallback éventuel sur localStorage si souhaité, 
+            // mais on privilégie la source de vérité DB désormais.
+        }
+        setIsLoading(false);
+    };
 
     useEffect(() => {
         loadHistory();
@@ -12,7 +40,13 @@ export const HistoryUI: React.FC<{ user: any }> = ({ user }) => {
         return () => window.removeEventListener('historyUpdated', loadHistory);
     }, [user]);
 
-    const clear = () => { if (confirm("Voulez-vous vider définitivement vos archives ?")) { localStorage.removeItem(`bookaio_history_${user.id}`); setHistory([]); } };
+    const clear = async () => {
+        if (confirm("Voulez-vous vider définitivement vos archives cloud ?")) {
+            const { error } = await supabase.from('generations').delete().eq('user_id', user.id);
+            if (!error) setHistory([]);
+            else alert("Erreur lors de la suppression.");
+        }
+    };
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -21,10 +55,12 @@ export const HistoryUI: React.FC<{ user: any }> = ({ user }) => {
                 <button onClick={clear} className="p-3 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all"><Trash2 className="w-5 h-5" /></button>
             </div>
             <div className="space-y-4">
-                {history.length === 0 ? (
+                {isLoading ? (
+                    <div className="py-20 text-center"><p className="animate-pulse text-white/20 uppercase tracking-widest text-[10px] font-bold">Synchronisation du coffre-fort...</p></div>
+                ) : history.length === 0 ? (
                     <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-[40px] flex flex-col items-center gap-4">
                         <Clock className="w-12 h-12 text-white/5" />
-                        <p className="text-white/20 font-bold uppercase tracking-widest text-[10px]">Votre coffre-fort est vide</p>
+                        <p className="text-white/20 font-bold uppercase tracking-widest text-[10px]">Votre coffre-fort cloud est vide</p>
                     </div>
                 ) : history.map(item => (
                     <div key={item.id} className="p-6 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between group hover:bg-white/[0.05] transition-all hover:border-red-500/20">

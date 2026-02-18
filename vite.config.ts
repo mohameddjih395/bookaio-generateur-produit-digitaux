@@ -1,23 +1,36 @@
 import path from 'path';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig(({ mode }) => {
-    const env = loadEnv(mode, '.', '');
-    return {
-      server: {
-        port: 3000,
-        host: '0.0.0.0',
+// SECURITY: Do NOT use `define` to inject secrets into the bundle.
+// All VITE_ prefixed env vars are intentionally public (Supabase anon key, Paystack public key).
+// Secrets (webhook URLs, signing keys) must live in Supabase Edge Function env vars only.
+
+export default defineConfig({
+  server: {
+    port: 3000,
+    host: '0.0.0.0',
+  },
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, '.'),
+    },
+  },
+  build: {
+    // Suppress source maps in production to avoid leaking code structure
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        // Code splitting: vendor libs in a separate chunk for better caching
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          supabase: ['@supabase/supabase-js'],
+          icons: ['lucide-react'],
+        },
       },
-      plugins: [react()],
-      define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
-      },
-      resolve: {
-        alias: {
-          '@': path.resolve(__dirname, '.'),
-        }
-      }
-    };
+    },
+    // Warn if any chunk exceeds 500kB
+    chunkSizeWarningLimit: 500,
+  },
 });

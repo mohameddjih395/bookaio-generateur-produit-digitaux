@@ -93,7 +93,6 @@ export const StepContent: React.FC<StepProps> = ({ form, updateForm, onNext, pro
                         {form.nombre_pages >= maxPages && <Sparkles className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />}
                     </div>
                 </div>
-                <div className="space-y-3"><label className="text-xs font-bold text-white/40 uppercase tracking-[0.3em]">Chapitres</label><input type="number" aria-label="Nombre de chapitres" className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-white font-bold outline-none focus:border-red-500/50" value={form.nombre_chapitres} onChange={(e) => updateForm({ nombre_chapitres: parseInt(e.target.value) || 0 })} /></div>
                 <div className="space-y-3"><label className="text-xs font-bold text-white/40 uppercase tracking-[0.3em]">Mots/Page</label><input type="number" aria-label="Nombre de mots par page" className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-white font-bold outline-none focus:border-red-500/50" value={form.mots_par_page} onChange={(e) => updateForm({ mots_par_page: parseInt(e.target.value) || 0 })} /></div>
             </div>
 

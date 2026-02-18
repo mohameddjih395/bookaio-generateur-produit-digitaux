@@ -21,7 +21,7 @@ export const Studio: React.FC<StudioProps> = ({ user, profile }) => {
   const [mode, setMode] = useState<StudioMode>('cover');
   const [usageCount, setUsageCount] = useState(0);
   const [ebookForm, setEbookForm] = useState<GenerationForm>({
-    nombre_pages: 5, nombre_chapitres: 3, mots_par_page: 300, avec_image: true,
+    nombre_pages: 5, mots_par_page: 300, avec_image: true,
     auteur: '', title: '', coverUrl: '', source_type: 'idea',
   });
 

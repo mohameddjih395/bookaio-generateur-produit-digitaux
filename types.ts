@@ -1,7 +1,6 @@
 
 export interface GenerationForm {
   nombre_pages: number;
-  nombre_chapitres: number;
   mots_par_page: number;
   avec_image: boolean;
   auteur: string;
