@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Image as ImageIcon, Box, Megaphone, Lock, Zap, Video, ChevronRight, History } from 'lucide-react';
 import { GeneratorForm } from './GeneratorForm';
-import { GenerationForm } from '../types';
+import { GenerationForm, User, UserProfile } from '../types';
 import { supabase } from '../services/supabaseClient';
 import { CoverForm } from './studio/CoverForm';
 import { MockupForm } from './studio/MockupForm';
@@ -12,8 +12,8 @@ import { HistoryUI } from './studio/HistoryUI';
 type StudioMode = 'cover' | 'ebook' | 'mockup' | 'ad' | 'video' | 'history';
 
 interface StudioProps {
-  user: any;
-  profile: any;
+  user: User | null;
+  profile: UserProfile | null;
   onAuthRequired: () => void;
 }
 

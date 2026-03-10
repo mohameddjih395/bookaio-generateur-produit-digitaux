@@ -9,6 +9,7 @@ import { Testimonials } from './components/Testimonials';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Sparkles, ChevronRight, Zap, Trophy, Target, ArrowDown, LogOut, Loader2 } from 'lucide-react';
 import { supabase } from './services/supabaseClient';
+import { User, UserProfile } from './types';
 
 // Lazy-load heavy components to reduce initial bundle size
 const Studio = lazy(() => import('./components/Studio').then(m => ({ default: m.Studio })));
@@ -25,11 +26,18 @@ const SectionLoader = () => (
   </div>
 );
 
+import { Notification, NotificationType } from './components/Notification';
+
 const App: React.FC = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [activeSuccessPlan, setActiveSuccessPlan] = useState<'essential' | 'abundance' | null>(null);
+  const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
+
+  const showNotification = (message: string, type: NotificationType = 'info') => {
+    setNotification({ message, type });
+  };
 
   const fetchProfile = async (userId: string, userEmail?: string) => {
     let { data, error } = await supabase
@@ -69,7 +77,21 @@ const App: React.FC = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    const handleGlobalNotification = (e: any) => {
+      if (e.detail) {
+        setNotification({
+          message: e.detail.message,
+          type: e.detail.type || 'info'
+        });
+      }
+    };
+
+    window.addEventListener('bookaio-notification', handleGlobalNotification);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('bookaio-notification', handleGlobalNotification);
+    };
   }, []);
 
   const handleSignOut = async () => {
@@ -206,6 +228,14 @@ const App: React.FC = () => {
         <Suspense fallback={null}>
           <PaymentSuccessModal plan={activeSuccessPlan} onClose={() => setActiveSuccessPlan(null)} />
         </Suspense>
+
+        {notification && (
+          <Notification
+            message={notification.message}
+            type={notification.type}
+            onClose={() => setNotification(null)}
+          />
+        )}
       </div>
     </ErrorBoundary>
   );

@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Trash2, FileText, Play, Layout, ExternalLink, Copy } from 'lucide-react';
-import { GeneratedItem } from '../../types';
+import { GeneratedItem, toast, User } from '../../types';
 import { supabase } from '../../services/supabaseClient';
 
-export const HistoryUI: React.FC<{ user: any }> = ({ user }) => {
+interface HistoryUIProps {
+    user: User | null;
+}
+
+export const HistoryUI: React.FC<HistoryUIProps> = ({ user }) => {
     const [history, setHistory] = useState<GeneratedItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -28,8 +32,7 @@ export const HistoryUI: React.FC<{ user: any }> = ({ user }) => {
             })));
         } else if (error) {
             console.error("Erreur chargement historique:", error);
-            // Fallback éventuel sur localStorage si souhaité, 
-            // mais on privilégie la source de vérité DB désormais.
+            toast("Erreur lors de la synchronisation du coffre-fort.", "error");
         }
         setIsLoading(false);
     };
@@ -41,10 +44,15 @@ export const HistoryUI: React.FC<{ user: any }> = ({ user }) => {
     }, [user]);
 
     const clear = async () => {
+        if (!user) return;
         if (confirm("Voulez-vous vider définitivement vos archives cloud ?")) {
             const { error } = await supabase.from('generations').delete().eq('user_id', user.id);
-            if (!error) setHistory([]);
-            else alert("Erreur lors de la suppression.");
+            if (!error) {
+                setHistory([]);
+                toast("Archives vidées.", "success");
+            } else {
+                toast("Erreur lors de la suppression.", "error");
+            }
         }
     };
 
@@ -74,7 +82,7 @@ export const HistoryUI: React.FC<{ user: any }> = ({ user }) => {
                             <button
                                 onClick={() => {
                                     navigator.clipboard.writeText(item.url);
-                                    alert("Lien copié !");
+                                    toast("Lien copié !", "success");
                                 }}
                                 aria-label="Copier le lien"
                                 className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-black/20 transition-all text-white/60 hover:text-white"

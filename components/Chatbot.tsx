@@ -8,9 +8,11 @@ interface Message {
   content: string;
 }
 
+import { User, UserProfile } from '../types';
+
 interface ChatbotProps {
-  user: any;
-  profile: any;
+  user: User | null;
+  profile: UserProfile | null;
 }
 
 export const Chatbot: React.FC<ChatbotProps> = ({ user, profile }) => {
@@ -77,18 +79,18 @@ export const Chatbot: React.FC<ChatbotProps> = ({ user, profile }) => {
       {/* Chat Window */}
       {isOpen && (
         <div className="fixed bottom-40 md:bottom-28 right-6 z-[60] w-[calc(100vw-3rem)] md:w-[400px] h-[600px] glass-card rounded-[40px] overflow-hidden flex flex-col shadow-[0_20px_100px_rgba(0,0,0,0.8)] border-red-500/20 animate-in slide-in-from-bottom-8 duration-500">
-          
+
           {/* Elite Mascot Header */}
           <div className="relative p-6 border-b border-white/5 bg-red-500/5 flex flex-col items-center pt-16">
             {/* Booky flying above header */}
             <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none">
-               <div className="w-24 h-24 rounded-[32px] bg-red-600 border-2 border-white/20 shadow-2xl flex items-center justify-center text-5xl animate-float-booky relative overflow-hidden">
-                 🐵
-                 <div className="absolute -right-1 -bottom-1 bg-zinc-900 p-1 rounded-lg border border-white/5">
-                    <Flame className="w-4 h-4 text-orange-500 animate-pulse" />
-                 </div>
-               </div>
-               <div className="w-14 h-2 bg-black/60 blur-md rounded-full mt-3 animate-shadow-booky opacity-40" />
+              <div className="w-24 h-24 rounded-[32px] bg-red-600 border-2 border-white/20 shadow-2xl flex items-center justify-center text-5xl animate-float-booky relative overflow-hidden">
+                🐵
+                <div className="absolute -right-1 -bottom-1 bg-zinc-900 p-1 rounded-lg border border-white/5">
+                  <Flame className="w-4 h-4 text-orange-500 animate-pulse" />
+                </div>
+              </div>
+              <div className="w-14 h-2 bg-black/60 blur-md rounded-full mt-3 animate-shadow-booky opacity-40" />
             </div>
 
             <div className="text-center">
@@ -104,9 +106,8 @@ export const Chatbot: React.FC<ChatbotProps> = ({ user, profile }) => {
           <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide" ref={scrollRef}>
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed ${
-                  msg.role === 'user' ? 'bg-red-500 text-white rounded-tr-none' : 'bg-white/5 border border-white/5 text-white/80 rounded-tl-none'
-                }`}>
+                <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed ${msg.role === 'user' ? 'bg-red-500 text-white rounded-tr-none' : 'bg-white/5 border border-white/5 text-white/80 rounded-tl-none'
+                  }`}>
                   {msg.content}
                 </div>
               </div>
@@ -115,8 +116,8 @@ export const Chatbot: React.FC<ChatbotProps> = ({ user, profile }) => {
               <div className="flex justify-start">
                 <div className="bg-white/5 p-4 rounded-2xl rounded-tl-none flex items-center gap-2">
                   <span className="w-1 h-1 bg-red-500 rounded-full animate-bounce" />
-                  <span className="w-1 h-1 bg-red-500 rounded-full animate-bounce" style={{animationDelay:'0.2s'}} />
-                  <span className="w-1 h-1 bg-red-500 rounded-full animate-bounce" style={{animationDelay:'0.4s'}} />
+                  <span className="w-1 h-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  <span className="w-1 h-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
                 </div>
               </div>
             )}
@@ -125,8 +126,8 @@ export const Chatbot: React.FC<ChatbotProps> = ({ user, profile }) => {
           {/* Input & Usage */}
           <div className="p-4 bg-black/40 border-t border-white/5">
             <div className="flex justify-between items-center mb-3 px-2">
-               <p className="text-[9px] font-bold uppercase tracking-widest text-white/20">Jetpack Usage: {chatUsage} / {plan === 'free' ? chatLimit : '∞'}</p>
-               {plan === 'free' && <a href="#pricing" className="text-[9px] font-bold text-red-500 uppercase tracking-widest hover:underline">Full Access</a>}
+              <p className="text-[9px] font-bold uppercase tracking-widest text-white/20">Jetpack Usage: {chatUsage} / {plan === 'free' ? chatLimit : '∞'}</p>
+              {plan === 'free' && <a href="#pricing" className="text-[9px] font-bold text-red-500 uppercase tracking-widest hover:underline">Full Access</a>}
             </div>
 
             {isLimited ? (

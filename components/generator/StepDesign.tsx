@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Lock, Wand2, Loader2, Upload, Image as ImageIcon } from 'lucide-react';
-import { StepProps } from '../../types';
+import { StepProps, toast } from '../../types';
 import { uploadToCloudinary } from '../../services/cloudinaryService';
 import { saveToHistory } from '../../services/webhookService';
 
@@ -22,7 +22,7 @@ export const StepDesign: React.FC<StepProps> = ({ form, updateForm, onNext, onPr
                     url
                 });
             } catch (error) {
-                alert("Erreur lors de l'upload de la couverture.");
+                toast("Erreur lors de l'upload de la couverture.", "error");
             } finally {
                 setIsUploading(false);
             }

@@ -3,20 +3,35 @@ import { AlertTriangle, Loader2 } from 'lucide-react';
 import { sendToWebhook } from '../../services/webhookService';
 import { persistAndLog } from './StudioHelpers';
 import { SuccessUI } from './SuccessUI';
+import { toast, User, UserProfile } from '../../types';
 
-export const VideoForm: React.FC<{ user: any; profile: any }> = ({ user, profile }) => {
+interface VideoFormProps {
+    user: User | null;
+    profile: UserProfile | null;
+}
+
+export const VideoForm: React.FC<VideoFormProps> = ({ user, profile }) => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<Blob | null>(null);
     const [description, setDescription] = useState('');
 
     const handleSubmit = async () => {
+        if (!description) return toast("Décrivez votre vidéo.", "info");
         setLoading(true);
-        const blob = await sendToWebhook({ description, type: 'video' }, 'video');
-        if (blob instanceof Blob && user) {
-            setResult(blob);
-            await persistAndLog(user.id, blob, `Vidéo Promo Elite`, 'video', 'promo_elite.mp4');
+        try {
+            const blob = await sendToWebhook({ description, type: 'video' }, 'video');
+            if (blob instanceof Blob && user) {
+                setResult(blob);
+                await persistAndLog(user.id, blob, `Vidéo Promo Elite`, 'video', 'promo_elite.mp4');
+                toast("Vidéo générée avec succès !", "success");
+            } else {
+                toast("Délai dépassé ou erreur lors de la génération vidéo.", "error");
+            }
+        } catch (err) {
+            toast("Erreur de connexion au serveur de rendu.", "error");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     if (result) return <SuccessUI onReset={() => setResult(null)} title="Vidéo Générée" blob={result} filename="promo.mp4" user={user} />;

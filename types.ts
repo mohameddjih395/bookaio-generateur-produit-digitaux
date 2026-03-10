@@ -1,3 +1,30 @@
+export interface User {
+  id: string;
+  email?: string;
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  plan: 'free' | 'essential' | 'abundance';
+  ebook_count_this_month: number;
+  quota_reset_at: string;
+  created_at: string;
+  updated_at: string;
+  chat_usage?: number;
+}
+
+export interface MaketouOptions {
+  apiKey: string;
+  shopUrl: string;
+  email: string;
+  amount: number;
+  currency: string;
+  metadata?: Record<string, any>;
+}
+
+export type PricingPlanId = 'free' | 'essential' | 'abundance';
+
 
 export interface GenerationForm {
   nombre_pages: number;
@@ -40,11 +67,17 @@ export interface StepProps {
   onPrev: () => void;
   onFail?: () => void;
   onModeChange?: (mode: any) => void;
-  profile: any;
-  user: any;
+  profile: UserProfile | null;
+  user: User | null;
 }
 
 export interface CloudinaryResponse {
   secure_url: string;
   public_id: string;
 }
+
+export const toast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+  window.dispatchEvent(new CustomEvent('bookaio-notification', {
+    detail: { message, type }
+  }));
+};

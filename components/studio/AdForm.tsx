@@ -4,8 +4,14 @@ import { sendToWebhook } from '../../services/webhookService';
 import { uploadToCloudinary } from '../../services/cloudinaryService';
 import { persistAndLog } from './StudioHelpers';
 import { SuccessUI } from './SuccessUI';
+import { toast, User, UserProfile } from '../../types';
 
-export const AdForm: React.FC<{ user: any; profile: any }> = ({ user, profile }) => {
+interface AdFormProps {
+    user: User | null;
+    profile: UserProfile | null;
+}
+
+export const AdForm: React.FC<AdFormProps> = ({ user, profile }) => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<Blob | null>(null);
     const [refImg, setRefImg] = useState('');
@@ -13,18 +19,38 @@ export const AdForm: React.FC<{ user: any; profile: any }> = ({ user, profile })
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleSubmit = async () => {
+        if (!description) return toast("Veuillez décrire votre offre.", "info");
         setLoading(true);
-        const blob = await sendToWebhook({ refImg, description }, 'ad');
-        if (blob instanceof Blob && user) {
-            setResult(blob);
-            await persistAndLog(user.id, blob, `Arsenal Ad: ${description.slice(0, 20)}`, 'ad', 'ad_pro.png');
+        try {
+            const blob = await sendToWebhook({ refImg, description }, 'ad');
+            if (blob instanceof Blob && user) {
+                setResult(blob);
+                await persistAndLog(user.id, blob, `Arsenal Ad: ${description.slice(0, 20)}`, 'ad', 'ad_pro.png');
+                toast("Arsenal publicitaire généré !", "success");
+            } else {
+                toast("Erreur lors de la génération.", "error");
+            }
+        } catch (err) {
+            toast("Erreur serveur.", "error");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) { setLoading(true); const url = await uploadToCloudinary(file); setRefImg(url); setLoading(false); }
+        if (file) {
+            setLoading(true);
+            try {
+                const url = await uploadToCloudinary(file);
+                setRefImg(url);
+                toast("Image source importée.", "success");
+            } catch (err) {
+                toast("Erreur upload.", "error");
+            } finally {
+                setLoading(false);
+            }
+        }
     };
 
     if (result) return <SuccessUI onReset={() => setResult(null)} title="Visuel Prêt" blob={result} filename="ad.png" user={user} />;
@@ -40,7 +66,7 @@ export const AdForm: React.FC<{ user: any; profile: any }> = ({ user, profile })
             </div>
             <input type="file" ref={fileInputRef} onChange={handleUpload} className="hidden" accept="image/*" />
             <button onClick={handleSubmit} disabled={loading} className="w-full py-6 rounded-2xl gradient-amber text-white font-bold text-xl shadow-2xl shadow-red-500/20">
-                {loading ? <div className="flex items-center gap-3"><Loader2 className="animate-spin" /> Création en cours...</div> : "Générer mon Arsenal"}
+                {loading ? <div className="flex items-center gap-3 justify-center"><Loader2 className="animate-spin" /> Création en cours...</div> : "Générer mon Arsenal"}
             </button>
         </div>
     );

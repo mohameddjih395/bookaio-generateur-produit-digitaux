@@ -2,16 +2,24 @@
 import React, { useState } from 'react';
 import { Check, ShieldCheck, Zap, XCircle, Loader2, Calendar, Sparkles } from 'lucide-react';
 
+import { User, UserProfile, PricingPlanId } from '../types';
+import { getCurrencyInfo, formatPrice } from '../services/currencyService';
+
 interface PricingProps {
   userEmail: string | undefined;
   userId: string | undefined;
-  onPaymentSuccess: (plan: 'essential' | 'abundance') => void;
+  onPaymentSuccess: (plan: PricingPlanId) => void;
   onAuthRequired: () => void;
 }
 
 export const Pricing: React.FC<PricingProps> = ({ userEmail, userId, onPaymentSuccess, onAuthRequired }) => {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annually'>('monthly');
+  const [currencyInfo, setCurrencyInfo] = useState({ currency: 'XOF', symbol: 'CFA', rate: 1 });
+
+  React.useEffect(() => {
+    getCurrencyInfo().then(setCurrencyInfo);
+  }, []);
 
   const plans = [
     {
@@ -48,7 +56,7 @@ export const Pricing: React.FC<PricingProps> = ({ userEmail, userId, onPaymentSu
     }
   ];
 
-  const handlePayment = (planId: string, amount: number) => {
+  const handlePayment = async (planId: string, amount: number) => {
     if (!userEmail || !userId) {
       onAuthRequired();
       return;
@@ -56,30 +64,37 @@ export const Pricing: React.FC<PricingProps> = ({ userEmail, userId, onPaymentSu
 
     setLoadingPlan(planId);
 
-    const handler = (window as any).PaystackPop.setup({
-      // Clé Live mise à jour
-      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-      email: userEmail,
-      amount: amount * 100,
-      currency: 'XOF',
-      metadata: {
-        user_id: userId,
-        pack: planId,
-        price_fcfa: amount,
-        billing: billingCycle
-      },
-      callback: (response: any) => {
-        setLoadingPlan(null);
-        // NOTE: In production, plan updates MUST be handled via a server-side webhook 
-        // from Paystack to ensure payment integrity (e.g. n8n -> Supabase).
-        // This client-side update is only for UI responsiveness.
-        onPaymentSuccess(planId as any);
-      },
-      onClose: () => {
-        setLoadingPlan(null);
+    try {
+      // Maketou API Integration (Direct link creation)
+      // Reference: https://maketou.com/developers
+      // Note: In a real scenario, this should be done via an Edge Function/Backend 
+      // but for this direct integration, we generate a payment link.
+      
+      const MAKETOU_API_KEY = import.meta.env.VITE_MAKETOU_API_KEY;
+      const MAKETOU_SHOP_URL = import.meta.env.VITE_MAKETOU_SHOP_URL; // e.g., https://maketou.com/s/your-shop
+
+      if (!MAKETOU_API_KEY || !MAKETOU_SHOP_URL) {
+          console.error('[BookAIO] Maketou configuration manquante.');
+          setLoadingPlan(null);
+          return;
       }
-    });
-    handler.openIframe();
+
+      // We redirect to the shop with parameters or use their API to create a checkout session
+      // For many African payment gateways like Maketou, a direct link with metadata is often used
+      // or a POST request to create a payment.
+      
+      // Building a simulated Maketou payment redirect
+      const paymentUrl = `${MAKETOU_SHOP_URL}/checkout?plan=${planId}&user_id=${userId}&billing=${billingCycle}&amount=${amount}&currency=${currencyInfo.currency}`;
+      
+      // In a real production environment, we would call an API here to get a unique session URL
+      // const res = await fetch('https://api.maketou.com/v1/payments', { ... });
+      
+      window.location.href = paymentUrl;
+      
+    } catch (error) {
+      console.error('[BookAIO] Erreur paiement Maketou:', error);
+      setLoadingPlan(null);
+    }
   };
 
   return (
@@ -108,10 +123,16 @@ export const Pricing: React.FC<PricingProps> = ({ userEmail, userId, onPaymentSu
               <div className="mb-8">
                 <h3 className="text-xl font-bold mb-4">{plan.name}</h3>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-serif font-bold">{(billingCycle === 'monthly' ? plan.price.monthly : plan.price.annually).toLocaleString()}</span>
-                  <span className="text-white/40 text-[10px] font-bold uppercase">Fcfa</span>
+                  <span className="text-4xl font-serif font-bold">
+                    {formatPrice(billingCycle === 'monthly' ? plan.price.monthly : plan.price.annually, currencyInfo.rate, '')}
+                  </span>
+                  <span className="text-white/40 text-[10px] font-bold uppercase">{currencyInfo.symbol}</span>
                 </div>
-                {plan.oldPrice && <p className="text-white/20 text-xs line-through mt-1">{(billingCycle === 'monthly' ? plan.oldPrice.monthly : plan.oldPrice.annually).toLocaleString()} Fcfa</p>}
+                {plan.oldPrice && (
+                    <p className="text-white/20 text-xs line-through mt-1">
+                        {formatPrice(billingCycle === 'monthly' ? plan.oldPrice.monthly : plan.oldPrice.annually, currencyInfo.rate, currencyInfo.symbol)}
+                    </p>
+                )}
               </div>
               <div className="space-y-4 mb-10 flex-1">
                 {plan.features.map((f, i) => (

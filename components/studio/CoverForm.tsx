@@ -4,8 +4,15 @@ import { sendToWebhook } from '../../services/webhookService';
 import { uploadToCloudinary } from '../../services/cloudinaryService';
 import { persistAndLog } from './StudioHelpers';
 import { SuccessUI } from './SuccessUI';
+import { toast, User, UserProfile } from '../../types';
 
-export const CoverForm: React.FC<{ onUseInEbook: (url: string) => void; user: any; profile: any }> = ({ onUseInEbook, user, profile }) => {
+interface CoverFormProps {
+    onUseInEbook: (url: string) => void;
+    user: User | null;
+    profile: UserProfile | null;
+}
+
+export const CoverForm: React.FC<CoverFormProps> = ({ onUseInEbook, user, profile }) => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<Blob | null>(null);
     const [prompt, setPrompt] = useState('');
@@ -14,18 +21,38 @@ export const CoverForm: React.FC<{ onUseInEbook: (url: string) => void; user: an
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!prompt) return toast("Décrivez votre couverture.", "info");
         setLoading(true);
-        const blob = await sendToWebhook({ prompt, refUrl, type: 'cover' }, 'cover');
-        if (blob instanceof Blob && user) {
-            setResult(blob);
-            await persistAndLog(user.id, blob, `Cover: ${prompt.slice(0, 30)}`, 'cover', 'cover_ia.png');
+        try {
+            const blob = await sendToWebhook({ prompt, refUrl, type: 'cover' }, 'cover');
+            if (blob instanceof Blob && user) {
+                setResult(blob);
+                await persistAndLog(user.id, blob, `Cover: ${prompt.slice(0, 30)}`, 'cover', 'cover_ia.png');
+                toast("Couverture générée !", "success");
+            } else {
+                toast("Erreur lors de la génération de la couverture.", "error");
+            }
+        } catch (err) {
+            toast("Erreur critique serveur.", "error");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleRefUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) { setLoading(true); const url = await uploadToCloudinary(file); setRefUrl(url); setLoading(false); }
+        if (file) {
+            setLoading(true);
+            try {
+                const url = await uploadToCloudinary(file);
+                setRefUrl(url);
+                toast("Inspiration importée.", "success");
+            } catch (err) {
+                toast("Erreur import inspiration.", "error");
+            } finally {
+                setLoading(false);
+            }
+        }
     };
 
     if (result) return <SuccessUI onReset={() => setResult(null)} title="Design Terminé" blob={result} filename="cover.png" onUseInEbook={onUseInEbook} user={user} />;
@@ -41,7 +68,7 @@ export const CoverForm: React.FC<{ onUseInEbook: (url: string) => void; user: an
                 <input type="file" ref={fileInputRef} onChange={handleRefUpload} className="hidden" accept="image/*" />
             </div>
             <button disabled={loading} className="w-full py-6 rounded-2xl gradient-amber text-white font-bold text-xl flex items-center justify-center gap-3 shadow-xl shadow-red-500/10">
-                {loading ? <div className="flex items-center gap-3"><Loader2 className="animate-spin" /> Production en cours...</div> : <><Sparkles className="w-6 h-6" /> Générer la Couverture</>}
+                {loading ? <div className="flex items-center gap-3 justify-center"><Loader2 className="animate-spin" /> Production en cours...</div> : <><Sparkles className="w-6 h-6" /> Générer la Couverture</>}
             </button>
         </form>
     );

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Lightbulb, FileText, Youtube, Instagram, Video, Music, Mic, Lock, Sparkles, ChevronRight, Square } from 'lucide-react';
-import { StepProps } from '../../types';
+import { StepProps, toast } from '../../types';
 import { uploadToCloudinary } from '../../services/cloudinaryService';
 
 export const StepContent: React.FC<StepProps> = ({ form, updateForm, onNext, profile }) => {
@@ -37,13 +37,13 @@ export const StepContent: React.FC<StepProps> = ({ form, updateForm, onNext, pro
                 const blob = new Blob(chunks, { type: 'audio/webm' });
                 const file = new File([blob], 'recording.webm', { type: 'audio/webm' });
                 setIsUploading(true);
-                try { const url = await uploadToCloudinary(file); updateForm({ media_url: url }); } catch (error) { alert("Erreur vocal."); } finally { setIsUploading(false); }
+                try { const url = await uploadToCloudinary(file); updateForm({ media_url: url }); } catch (error) { toast("Erreur lors du traitement vocal.", "error"); } finally { setIsUploading(false); }
             };
             mediaRecorder.start();
             setIsRecording(true);
             setRecordTime(0);
             timerRef.current = window.setInterval(() => setRecordTime(prev => prev + 1), 1000);
-        } catch (err) { alert("Microphone inaccessible."); }
+        } catch (err) { toast("Microphone inaccessible.", "error"); }
     };
 
     const stopRecording = () => { if (mediaRecorderRef.current && isRecording) { mediaRecorderRef.current.stop(); setIsRecording(false); if (timerRef.current) clearInterval(timerRef.current); } };
@@ -87,7 +87,7 @@ export const StepContent: React.FC<StepProps> = ({ form, updateForm, onNext, pro
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-3">
-                    <label className="text-xs font-bold text-white/40 uppercase tracking-[0.3em]">Pages (Max {maxPages})</label>
+                    <label className="text-xs font-bold text-white/40 uppercase tracking-[0.3em]">Pages (~ Max {maxPages})</label>
                     <div className="relative">
                         <input type="number" min="1" max={maxPages} aria-label="Nombre de pages" className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-white font-bold pr-12 outline-none focus:border-red-500/50" value={form.nombre_pages} onChange={(e) => handlePageChange(e.target.value)} />
                         {form.nombre_pages >= maxPages && <Sparkles className="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />}

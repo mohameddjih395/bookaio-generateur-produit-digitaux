@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
 
-export const DashboardStep: React.FC<{ resultData: any; onNext: () => void }> = ({ resultData, onNext }) => {
+interface DashboardStepProps {
+    resultData: { download_url: string };
+    onNext: () => void;
+}
+
+export const DashboardStep: React.FC<DashboardStepProps> = ({ resultData, onNext }) => {
     const [progress, setProgress] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
 
@@ -29,4 +34,4 @@ export const DashboardStep: React.FC<{ resultData: any; onNext: () => void }> = 
             )}
         </div>
     );
-}
+};

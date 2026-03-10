@@ -48,13 +48,12 @@ CREATE TABLE IF NOT EXISTS public.generations (
 -- ─── Table: orders ────────────────────────────────────────────────────────────
 -- Stores Paystack payment records. Updated by the Paystack webhook via n8n.
 
-CREATE TABLE IF NOT EXISTS public.orders (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id         UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   plan            TEXT NOT NULL CHECK (plan IN ('essential', 'abundance')),
-  amount_fcfa     INTEGER NOT NULL,
+  amount_paid     INTEGER NOT NULL, -- Total amount paid in the transaction's currency
+  currency        TEXT NOT NULL DEFAULT 'XOF', -- Transaction currency (XOF, EUR, USD, etc.)
   billing_cycle   TEXT NOT NULL CHECK (billing_cycle IN ('monthly', 'annually')),
-  paystack_ref    TEXT UNIQUE,
+  payment_ref     TEXT UNIQUE, -- Unique reference from the payment provider (Paystack/Maketou)
+  provider        TEXT NOT NULL DEFAULT 'maketou', -- Payment provider used
   status          TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed', 'refunded')),
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -174,9 +173,9 @@ BEGIN
   WHERE id = p_user_id;
 
   -- Record the order
-  INSERT INTO public.orders (user_id, plan, amount_fcfa, billing_cycle, paystack_ref, status)
-  VALUES (p_user_id, p_plan, p_amount_fcfa, p_billing_cycle, p_paystack_ref, 'completed')
-  ON CONFLICT (paystack_ref) DO UPDATE SET status = 'completed';
+  INSERT INTO public.orders (user_id, plan, amount_paid, currency, billing_cycle, payment_ref, status, provider)
+  VALUES (p_user_id, p_plan, p_amount_fcfa, 'XOF', p_billing_cycle, p_paystack_ref, 'completed', 'paystack')
+  ON CONFLICT (payment_ref) DO UPDATE SET status = 'completed';
 END;
 $$;
 

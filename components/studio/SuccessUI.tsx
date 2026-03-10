@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, Download } from 'lucide-react';
 
-export const SuccessUI: React.FC<{ onReset: () => void; title: string; blob: Blob | null; filename: string; onUseInEbook?: (url: string) => void; user: any }> = ({ onReset, title, blob, filename, onUseInEbook, user }) => {
+import { User } from '../../types';
+
+export const SuccessUI: React.FC<{ onReset: () => void; title: string; blob: Blob | null; filename: string; onUseInEbook?: (url: string) => void; user: User | null }> = ({ onReset, title, blob, filename, onUseInEbook, user }) => {
     const [mediaUrl, setMediaUrl] = useState<string | null>(null);
     const isVideo = filename.endsWith('.mp4');
 

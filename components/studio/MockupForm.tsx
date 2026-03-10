@@ -4,8 +4,14 @@ import { sendToWebhook } from '../../services/webhookService';
 import { uploadToCloudinary } from '../../services/cloudinaryService';
 import { persistAndLog } from './StudioHelpers';
 import { SuccessUI } from './SuccessUI';
+import { toast, User, UserProfile } from '../../types';
 
-export const MockupForm: React.FC<{ user: any; profile: any }> = ({ user, profile }) => {
+interface MockupFormProps {
+    user: User | null;
+    profile: UserProfile | null;
+}
+
+export const MockupForm: React.FC<MockupFormProps> = ({ user, profile }) => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<Blob | null>(null);
     const [mockupType, setMockupType] = useState('solo');
@@ -13,19 +19,33 @@ export const MockupForm: React.FC<{ user: any; profile: any }> = ({ user, profil
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleSubmit = async () => {
-        if (!coverUrl) return alert("Veuillez d'abord importer une couverture.");
+        if (!coverUrl) return toast("Veuillez d'abord importer une couverture.", "info");
         setLoading(true);
         const blob = await sendToWebhook({ coverUrl, mockupType }, 'mockup');
         if (blob instanceof Blob && user) {
             setResult(blob);
             await persistAndLog(user.id, blob, `Mockup 3D (${mockupType})`, 'mockup', 'mockup_elite.png');
+            toast("Mockup généré avec succès !", "success");
+        } else {
+            toast("Erreur lors de la génération du mockup.", "error");
         }
         setLoading(false);
     };
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) { setLoading(true); const url = await uploadToCloudinary(file); setCoverUrl(url); setLoading(false); }
+        if (file) {
+            setLoading(true);
+            try {
+                const url = await uploadToCloudinary(file);
+                setCoverUrl(url);
+                toast("Couverture importée.", "success");
+            } catch (err) {
+                toast("Erreur lors de l'import.", "error");
+            } finally {
+                setLoading(false);
+            }
+        }
     };
 
     if (result) return <SuccessUI onReset={() => setResult(null)} title="Mockup Prêt" blob={result} filename="mockup.png" user={user} />;
